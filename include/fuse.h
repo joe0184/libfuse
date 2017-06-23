@@ -259,6 +259,13 @@ struct fuse_config {
 	int nullpath_ok;
 
 	/**
+	 * The maximum number of available worker threads before they
+	 * start to get deleted when they become idle. If not
+	 * specified, the default is 10.
+	 */
+	int max_idle_threads;
+
+	/**
 	 * The remaining options are used by libfuse internally and
 	 * should not be touched.
 	 */

@@ -48,6 +48,7 @@ struct fuse_mt {
 	int exit;
 	int error;
 	int clone_fd;
+	int max_idle;
 };
 
 static struct fuse_chan *fuse_chan_new(int fd)
@@ -161,7 +162,7 @@ static void *fuse_do_work(void *data)
 		pthread_mutex_lock(&mt->lock);
 		if (!isforget)
 			mt->numavail++;
-		if (mt->numavail > 10) {
+		if (mt->numavail > mt->max_idle) {
 			if (mt->exit) {
 				pthread_mutex_unlock(&mt->lock);
 				return NULL;
@@ -300,7 +301,7 @@ static void fuse_join_worker(struct fuse_mt *mt, struct fuse_worker *w)
 	free(w);
 }
 
-int fuse_session_loop_mt(struct fuse_session *se, int clone_fd)
+int fuse_session_loop_mt(struct fuse_session *se, int clone_fd, int max_idle)
 {
 	int err;
 	struct fuse_mt mt;
@@ -312,6 +313,7 @@ int fuse_session_loop_mt(struct fuse_session *se, int clone_fd)
 	mt.error = 0;
 	mt.numworker = 0;
 	mt.numavail = 0;
+	mt.max_idle = max_idle;
 	mt.main.thread_id = pthread_self();
 	mt.main.prev = mt.main.next = &mt.main;
 	sem_init(&mt.finish, 0, 0);

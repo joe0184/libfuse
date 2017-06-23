@@ -4358,7 +4358,7 @@ int fuse_loop_mt(struct fuse *f, int clone_fd)
 	if (res)
 		return -1;
 
-	res = fuse_session_loop_mt(fuse_get_session(f), clone_fd);
+	res = fuse_session_loop_mt(fuse_get_session(f), clone_fd, f->conf.max_idle_threads);
 	fuse_stop_cleanup_thread(f);
 	return res;
 }
@@ -4423,6 +4423,7 @@ static const struct fuse_opt fuse_lib_opts[] = {
 	FUSE_LIB_OPT("noforget",              remember, -1),
 	FUSE_LIB_OPT("remember=%u",           remember, 0),
 	FUSE_LIB_OPT("modules=%s",	      modules, 0),
+	FUSE_LIB_OPT("idle_threads=%u",   max_idle_threads, 0),
 	FUSE_OPT_END
 };
 
@@ -4442,7 +4443,8 @@ static void fuse_lib_help(void)
 "    -o ac_attr_timeout=T   auto cache timeout for attributes (attr_timeout)\n"
 "    -o noforget            never forget cached inodes\n"
 "    -o remember=T          remember cached inodes for T seconds (0s)\n"
-"    -o modules=M1[:M2...]  names of modules to push onto filesystem stack\n");
+"    -o modules=M1[:M2...]  names of modules to push onto filesystem stack\n"
+"    -o idle_threads=N      maximum number of idle threads allowed\n");
 }
 
 static void fuse_lib_help_modules(void)
@@ -4671,6 +4673,10 @@ struct fuse *fuse_new(struct fuse_args *args,
 			    fuse_push_module(f, module, args) == -1)
 				goto out_free_fs;
 		}
+	}
+
+	if (f->conf.max_idle_threads == 0) {
+		f->conf.max_idle_threads = 10;
 	}
 
 	if(f->conf.show_help) {

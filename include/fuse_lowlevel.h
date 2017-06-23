@@ -1830,7 +1830,7 @@ int fuse_session_loop(struct fuse_session *se);
  *                 (may increase performance)
  * @return see fuse_session_loop()
  */
-int fuse_session_loop_mt(struct fuse_session *se, int clone_fd);
+int fuse_session_loop_mt(struct fuse_session *se, int clone_fd, int max_idle);
 
 /**
  * Flag a session as terminated.
