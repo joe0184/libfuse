@@ -130,6 +130,24 @@ struct fuse_forget_data {
 	uint64_t nlookup;
 };
 
+/**
+ * Configuration parameters passed to fuse_session_loop_mt()
+ */
+struct fuse_loop_config {
+    /**
+     * whether to use separate device fds for each thread
+     * (may increase performance)
+     */
+    int clone_fd;
+
+    /**
+     * The maximum number of available worker threads before they
+     * start to get deleted when they become idle. If not
+     * specified, the default is 10.
+     */
+    int max_idle_threads;
+};
+
 /* 'to_set' flags in setattr */
 #define FUSE_SET_ATTR_MODE	(1 << 0)
 #define FUSE_SET_ATTR_UID	(1 << 1)
@@ -1826,11 +1844,15 @@ int fuse_session_loop(struct fuse_session *se);
  * fuse_session_loop().
  *
  * @param se the session
- * @param clone_fd whether to use separate device fds for each thread
- *                 (may increase performance)
+ * @param config additional configuration parameters
  * @return see fuse_session_loop()
  */
-int fuse_session_loop_mt(struct fuse_session *se, int clone_fd, int max_idle);
+#if FUSE_USE_VERSION <= 31
+int fuse_session_loop_mt_no_config(struct fuse_session *se, int clone_fd);
+#define fuse_session_loop_mt(se, clone_fd) fuse_session_loop_mt_no_config(se, clone_fd)
+#else
+int fuse_session_loop_mt(struct fuse_session *se, struct fuse_loop_config *config);
+#endif
 
 /**
  * Flag a session as terminated.

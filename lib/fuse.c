@@ -4351,6 +4351,8 @@ int fuse_loop(struct fuse *f)
 
 int fuse_loop_mt(struct fuse *f, int clone_fd)
 {
+	struct fuse_loop_config loop_config;
+
 	if (f == NULL)
 		return -1;
 
@@ -4358,7 +4360,9 @@ int fuse_loop_mt(struct fuse *f, int clone_fd)
 	if (res)
 		return -1;
 
-	res = fuse_session_loop_mt(fuse_get_session(f), clone_fd, f->conf.max_idle_threads);
+	loop_config.clone_fd = clone_fd;
+	loop_config.max_idle_threads = f->conf.max_idle_threads;
+	res = fuse_session_loop_mt(fuse_get_session(f), &loop_config);
 	fuse_stop_cleanup_thread(f);
 	return res;
 }
