@@ -1844,12 +1844,12 @@ int fuse_session_loop(struct fuse_session *se);
  * fuse_session_loop().
  *
  * @param se the session
- * @param config additional configuration parameters
+ * @param config session loop configuration 
  * @return see fuse_session_loop()
  */
-#if FUSE_USE_VERSION <= 31
-int fuse_session_loop_mt_no_config(struct fuse_session *se, int clone_fd);
-#define fuse_session_loop_mt(se, clone_fd) fuse_session_loop_mt_no_config(se, clone_fd)
+#if FUSE_USE_VERSION < 32
+int fuse_session_loop_mt_31(struct fuse_session *se, int clone_fd);
+#define fuse_session_loop_mt(se, clone_fd) fuse_session_loop_mt_31(se, clone_fd)
 #else
 int fuse_session_loop_mt(struct fuse_session *se, struct fuse_loop_config *config);
 #endif

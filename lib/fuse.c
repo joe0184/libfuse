@@ -4351,8 +4351,6 @@ int fuse_loop(struct fuse *f)
 
 int fuse_loop_mt(struct fuse *f, int clone_fd)
 {
-	struct fuse_loop_config loop_config;
-
 	if (f == NULL)
 		return -1;
 
@@ -4360,9 +4358,7 @@ int fuse_loop_mt(struct fuse *f, int clone_fd)
 	if (res)
 		return -1;
 
-	loop_config.clone_fd = clone_fd;
-	loop_config.max_idle_threads = f->conf.max_idle_threads;
-	res = fuse_session_loop_mt(fuse_get_session(f), &loop_config);
+	res = fuse_session_loop_mt(fuse_get_session(f), clone_fd);
 	fuse_stop_cleanup_thread(f);
 	return res;
 }
@@ -4425,7 +4421,7 @@ static const struct fuse_opt fuse_lib_opts[] = {
 	FUSE_LIB_OPT("noforget",              remember, -1),
 	FUSE_LIB_OPT("remember=%u",           remember, 0),
 	FUSE_LIB_OPT("modules=%s",	      modules, 0),
-	FUSE_LIB_OPT("idle_threads=%u",   max_idle_threads, 0),
+	FUSE_LIB_OPT("max_idle_threads=%u",   max_idle_threads, 0),
 	FUSE_OPT_END
 };
 
@@ -4473,7 +4469,7 @@ void fuse_lib_help(struct fuse_args *args)
 "    -o noforget            never forget cached inodes\n"
 "    -o remember=T          remember cached inodes for T seconds (0s)\n"
 "    -o modules=M1[:M2...]  names of modules to push onto filesystem stack\n"
-"    -o idle_threads=N      maximum number of idle threads allowed\n");
+"    -o max_idle_threads=N  maximum number of idle threads allowed\n");
 
 
 	/* Print low-level help */
@@ -4656,6 +4652,7 @@ struct fuse *fuse_new_31(struct fuse_args *args,
 	f->conf.attr_timeout = 1.0;
 	f->conf.negative_timeout = 0.0;
 	f->conf.intr_signal = FUSE_DEFAULT_INTR_SIGNAL;
+	f->conf.max_idle_threads = -1;
 
 	/* Parse options */
 	if (fuse_opt_parse(args, &f->conf, fuse_lib_opts,
@@ -4709,7 +4706,8 @@ struct fuse *fuse_new_31(struct fuse_args *args,
 	}
 
 
-	if (f->conf.max_idle_threads == 0) {
+	if (f->conf.max_idle_threads == -1) {
+		/* If the number of idle threads was not set, default to 10. */
 		f->conf.max_idle_threads = 10;
 	}
 

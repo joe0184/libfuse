@@ -301,9 +301,9 @@ static void fuse_join_worker(struct fuse_mt *mt, struct fuse_worker *w)
 	free(w);
 }
 
-int fuse_session_loop_mt_config(struct fuse_session *se, struct fuse_loop_config *config);
-FUSE_SYMVER(".symver fuse_session_loop_mt_config,fuse_session_loop_mt@@FUSE_3.2");
-int fuse_session_loop_mt_config(struct fuse_session *se, struct fuse_loop_config *config)
+int fuse_session_loop_mt_32(struct fuse_session *se, struct fuse_loop_config *config);
+FUSE_SYMVER(".symver fuse_session_loop_mt_32,fuse_session_loop_mt@@FUSE_3.2");
+int fuse_session_loop_mt_32(struct fuse_session *se, struct fuse_loop_config *config)
 {
 	int err;
 	struct fuse_mt mt;
@@ -349,12 +349,12 @@ int fuse_session_loop_mt_config(struct fuse_session *se, struct fuse_loop_config
 	return err;
 }
 
-int fuse_session_loop_mt_no_config(struct fuse_session *se, int clone_fd);
-FUSE_SYMVER(".symver fuse_session_loop_mt_no_config,fuse_session_loop_mt@FUSE_3.1");
-int fuse_session_loop_mt_no_config(struct fuse_session *se, int clone_fd)
+int fuse_session_loop_mt_31(struct fuse_session *se, int clone_fd);
+FUSE_SYMVER(".symver fuse_session_loop_mt_31,fuse_session_loop_mt@FUSE_3.1");
+int fuse_session_loop_mt_31(struct fuse_session *se, int clone_fd)
 {
 	struct fuse_loop_config config;
 	config.clone_fd = clone_fd;
 	config.max_idle_threads = 10;
-	return fuse_session_loop_mt_config(se, &config);
+	return fuse_session_loop_mt_32(se, &config);
 }

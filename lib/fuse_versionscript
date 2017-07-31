@@ -140,7 +140,7 @@ FUSE_3.1 {
 
 FUSE_3.2 {
 	global:
-		fuse_session_loop_mt_no_config;
+		fuse_session_loop_mt_31;
 } FUSE_3.1;
 
 # Local Variables:
